@@ -4,11 +4,11 @@ config();
 async function main() {
   try {
     await mongoose.connect(process.env.DB_URL as string, {
-      dbName: "social_media",
+      dbName: process.env.DB_NAME,
     });
-    console.log("connected to DB");
+    console.log("Connected to DB");
   } catch (error) {
-    console.log(error, 'db');
+    console.log(error, "db");
   }
 }
 

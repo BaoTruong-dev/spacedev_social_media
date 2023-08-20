@@ -1,3 +1,4 @@
+import { GUARD_ONE_KEY } from "./../constant/metadataKey";
 import { Express, NextFunction, Request, Response, Router } from "express";
 
 import "reflect-metadata";
@@ -37,9 +38,15 @@ export function Controllers(prefix: string) {
             VALIDATE_KEY + e.propertyKey,
             target
           );
-
+          const guardOne = Reflect.getMetadata(
+            GUARD_ONE_KEY + e.propertyKey,
+            target
+          );
           if (validate) {
             middlewares.unshift(validate);
+          }
+          if (guardOne) {
+            middlewares.unshift(guardOne);
           }
           route[e.method](prefix + e.url, ...middlewares);
         });
@@ -65,7 +72,6 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
         handler: originalMethod,
         propertyKey,
       });
-
       Reflect.defineMetadata(ROUTERS_KEY, routes, target.constructor);
     };
   };

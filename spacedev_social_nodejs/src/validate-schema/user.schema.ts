@@ -10,20 +10,30 @@ export const userValidateRegister = Joi.object({
     .custom((value, helpers) => {
       let name = helpers.state.ancestors[0].name;
       if (value.includes(name)) {
-        return helpers.message("Your password's not allowed includes name" as unknown as Joi.LanguageMessages);
+        return helpers.message(
+          "Your password's not allowed includes name" as unknown as Joi.LanguageMessages
+        );
       }
       if (!rulesRegex.test(value)) {
-        return helpers.message("Your password must include uppercase letters, lowercase letters, special characters, and number" as unknown as Joi.LanguageMessages);
+        return helpers.message(
+          "Your password must include uppercase letters, lowercase letters, special characters, and number" as unknown as Joi.LanguageMessages
+        );
       }
       return true;
     })
     .required(),
 });
 
-// export const userValidateLogin = Joi.object({
-//   email: userValidateRegister.extract("email"),
-//   password: userValidateRegister.extract("password"),
-// });
+export const userValidateLogin = Joi.object({
+  email: userValidateRegister.extract("email"),
+  password: userValidateRegister.extract("password"),
+});
+
+export const userValidateChangePassword = Joi.object({
+  uid: Joi.string().required(),
+  password: userValidateRegister.extract("password"),
+  newPassword: userValidateRegister.extract("password"),
+});
 
 // export const userValidateForgotPassword = Joi.object({
 //   email: userValidateRegister.extract("email"),

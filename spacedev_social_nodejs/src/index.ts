@@ -1,10 +1,10 @@
-import { AppDecorator, BaseApp } from "./decorators/App.decorator";
 import { config } from "dotenv";
-import { UsersController } from "./controllers/users.controller";
+import { AuthController } from "./controllers/auth.controller";
+import { AppDecorator, BaseApp } from "./decorators/App.decorator";
 config();
 const PORT = process.env.PASSWORD || 8080;
 @AppDecorator({
-  controllers: [UsersController],
+  controllers: [AuthController],
 })
 export class App extends BaseApp {}
 

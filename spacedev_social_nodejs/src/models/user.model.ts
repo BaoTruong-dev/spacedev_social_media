@@ -5,8 +5,11 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: false,
-       default: 'null',
+      default: "",
+    },
+    refresh_token: {
+      type: String,
+      default: "",
     },
     email: {
       type: String,
@@ -22,10 +25,9 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    code: {
+    verify_email_code: {
       type: String,
-      default: null,
-      required: false,
+      default: undefined,
     },
   },
   {

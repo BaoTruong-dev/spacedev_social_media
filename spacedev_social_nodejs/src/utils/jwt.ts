@@ -1,17 +1,25 @@
 import jwt from "jsonwebtoken";
+import { config } from "dotenv";
+config();
+
+export interface TokenType extends jwt.JwtPayload {
+  uid: string;
+  iat: number;
+  exp: number;
+}
 export class Token {
   static generateToken(
     payload: object | string | Buffer,
     secret: string,
     expiresIn: string
   ) {
-    return jwt.sign(payload, secret, { algorithm: "RS256", expiresIn });
+    return jwt.sign(payload, secret, { algorithm: "HS256", expiresIn });
   }
   static accessToken(data: object) {
     return this.generateToken(
       data,
       process.env.ACCESS_TOKEN_SECRET as string,
-      "1m"
+      "10m"
     );
   }
   static refreshToken(data: object) {
@@ -21,7 +29,7 @@ export class Token {
       "7d"
     );
   }
-  static verifyToken(token: string, secret: string) {
-    return jwt.verify(token, secret);
+  static verifyToken(token: string, secret: string): TokenType {
+    return jwt.verify(token, secret) as TokenType;
   }
 }
