@@ -35,10 +35,9 @@ export const userValidateChangePassword = Joi.object({
   newPassword: userValidateRegister.extract("password"),
 });
 
-// export const userValidateForgotPassword = Joi.object({
-//   email: userValidateRegister.extract("email"),
-//   url: userValidateRegister.extract("name"),
-// });
+export const userValidateForgotPassword = Joi.object({
+  email: userValidateRegister.extract("email"),
+});
 
 // export const userValidateResetPassword = Joi.object({
 //   code: userValidateRegister.extract("name"),

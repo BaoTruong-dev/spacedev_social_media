@@ -1,4 +1,4 @@
-import { GUARD_ONE_KEY } from "./../constant/metadataKey";
+import { GUARD_KEY } from "./../constant/metadataKey";
 import { Express, NextFunction, Request, Response, Router } from "express";
 
 import "reflect-metadata";
@@ -28,7 +28,7 @@ export function Controllers(prefix: string) {
           middlewares.push(
             async (req: Request, res: Response, next: NextFunction) => {
               try {
-                await e.handler(req, res);
+                await e.handler.apply(this, [req, res]);
               } catch (error) {
                 next(error);
               }
@@ -39,14 +39,18 @@ export function Controllers(prefix: string) {
             target
           );
           const guardOne = Reflect.getMetadata(
-            GUARD_ONE_KEY + e.propertyKey,
+            GUARD_KEY + e.propertyKey,
             target
           );
+          const guardAll = Reflect.getMetadata(GUARD_KEY, target);
           if (validate) {
             middlewares.unshift(validate);
           }
           if (guardOne) {
             middlewares.unshift(guardOne);
+          }
+          if (guardAll) {
+            middlewares.unshift(guardAll);
           }
           route[e.method](prefix + e.url, ...middlewares);
         });

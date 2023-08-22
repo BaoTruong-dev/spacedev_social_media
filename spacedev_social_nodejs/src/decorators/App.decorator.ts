@@ -7,6 +7,8 @@ import helmet from "helmet";
 import path from "path";
 import cors from "cors";
 import "../config/db.config";
+import "../config/redis.config";
+
 interface AppDecoratorOptions {
   controllers: any[];
 }
