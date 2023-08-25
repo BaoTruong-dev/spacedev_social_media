@@ -15,7 +15,6 @@ const logToTerminal = (log) => {
     console.log(log);
 };
 
-
 export const loggerMiddleware = morgan('combined', {
     stream: {
         write: (log) => {
@@ -27,3 +26,4 @@ export const loggerMiddleware = morgan('combined', {
         },
     },
 });
+console.log('Lorem ipsum dolor sit amet consectetur adipisicing elit.Sed sunt exercitationem ut rem culpa! Corrupti suscipit fugit quas repudiandae quibusdam labore vero dolorum, doloremque esse totam ? Consectetur laboriosam quibusdam dolore!;');

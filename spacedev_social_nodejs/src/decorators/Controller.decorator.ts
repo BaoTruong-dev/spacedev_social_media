@@ -39,19 +39,25 @@ export function Controllers(prefix: string) {
             target
           );
           const guardOne = Reflect.getMetadata(
-            GUARD_KEY + e.propertyKey,
-            target
+            GUARD_KEY,
+            target,
+            e.propertyKey
           );
+
           const guardAll = Reflect.getMetadata(GUARD_KEY, target);
           if (validate) {
             middlewares.unshift(validate);
           }
           if (guardOne) {
-            middlewares.unshift(guardOne);
+            for (let i = guardOne.length - 1; i >= 0; i--) {
+              middlewares.unshift(guardOne[i]);
+            }
           }
           if (guardAll) {
             middlewares.unshift(guardAll);
           }
+          console.log(middlewares);
+
           route[e.method](prefix + e.url, ...middlewares);
         });
         this.app.use(route);

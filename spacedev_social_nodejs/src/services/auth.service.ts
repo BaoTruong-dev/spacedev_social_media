@@ -1,3 +1,4 @@
+import { TokenModel } from "./../models/token.model";
 import createHttpError from "http-errors";
 import { client } from "../config/redis.config";
 import { httpStatus } from "../constant/httpStatus";
@@ -27,6 +28,11 @@ export interface authForgotPasswordType {
 export interface authVerifyEmailType {
   email: authRegisterType["email"];
   verify_code: string;
+}
+
+export interface authLogoutType {
+  uid: string;
+  refresh_token: string;
 }
 
 export interface authResetPasswordType {
@@ -73,12 +79,20 @@ export default class AuthService {
     }
     const access_token = Token.accessToken({ uid: user._id });
     const refresh_token = Token.refreshToken({ uid: user._id });
-    user.refresh_token = refresh_token;
-    user.save();
+    await TokenModel.create({
+      uid: user._id,
+      refresh_token,
+    });
     return {
       access_token,
       refresh_token,
     };
+  }
+  async logout({ uid, refresh_token }: authLogoutType) {
+    return await TokenModel.deleteOne({
+      uid,
+      refresh_token,
+    });
   }
   async forgotPassword({ email }: authForgotPasswordType) {
     let user = await UserModel.findOne({
@@ -118,6 +132,27 @@ export default class AuthService {
     user.verify = true;
     user.verify_email_code = undefined;
     await user.save();
+  }
+  async refreshToken(refresh_token: string) {
+    const { uid } = await Token.verifyToken(
+      refresh_token,
+      process.env.REFRESH_TOKEN_SECRET as string
+    );
+    let token = await TokenModel.findOne({
+      uid,
+      refresh_token,
+    });
+    if (!token) {
+      throw createHttpError(httpStatus.badRequest, "Refresh Token is wrong!");
+    }
+    const new_access_token = Token.accessToken({ uid });
+    const new_refresh_token = Token.refreshToken({ uid });
+    token.refresh_token = new_refresh_token;
+    token.save();
+    return {
+      new_access_token,
+      new_refresh_token,
+    };
   }
   async resetPassword({
     password_code,

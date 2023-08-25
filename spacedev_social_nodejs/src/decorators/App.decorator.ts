@@ -8,6 +8,7 @@ import path from "path";
 import cors from "cors";
 import "../config/db.config";
 import "../config/redis.config";
+import cookieParser from "cookie-parser";
 
 interface AppDecoratorOptions {
   controllers: any[];
@@ -24,6 +25,7 @@ export function AppDecorator(options: AppDecoratorOptions) {
         this.app.use(express.json());
         this.app.use(helmet());
         this.app.use(cors());
+        this.app.use(cookieParser());
         this.app.use("/upload", express.static(path.join(__dirname, "upload")));
         controllers.forEach((controller) => {
           new controller(this.app);
