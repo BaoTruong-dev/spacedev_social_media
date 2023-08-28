@@ -1,4 +1,5 @@
-import { jwtMiddleware } from "./../middlewares/jwt.middleware";
+import { RequestCustom } from "../@types/type";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { Request, Response } from "express";
 import { Controllers, Get, Post } from "../decorators/Controller.decorator";
 import { Validate } from "../decorators/Validate.decorator";
@@ -13,28 +14,28 @@ import {
 } from "../services/auth.service";
 import { HttpResponse } from "../utils/HttpResponse";
 import {
-  userValidateChangePassword,
-  userValidateForgotPassword,
-  userValidateLogin,
-  userValidateRegister,
-} from "../validate-schema/user.schema";
+  authValidateChangePassword,
+  authValidateForgotPassword,
+  authValidateLogin,
+  authValidateRegister,
+} from "../validate-schema/auth.schema";
 import { GuardOne } from "../decorators/Guard.decorator";
 import { Inject } from "../decorators/DI-IOC.decorator";
 
 @Controllers("/auth")
-export class AuthController {
+export default class AuthController {
   @Inject(AuthService)
   private authService!: AuthService;
 
   @Post("/register")
-  @Validate(userValidateRegister)
-  async register(req: Request<any, any, authRegisterType>, res: Response) {
+  @Validate(authValidateRegister)
+  async register(req: RequestCustom<any, authRegisterType>, res: Response) {
     await this.authService.register(req.body);
     return HttpResponse.created(res);
   }
   @Post("/login")
-  @Validate(userValidateLogin)
-  async login(req: Request<any, any, authLoginType>, res: Response) {
+  @Validate(authValidateLogin)
+  async login(req: RequestCustom<any, authLoginType>, res: Response) {
     let { refresh_token, access_token } = await this.authService.login(
       req.body
     );
@@ -47,7 +48,7 @@ export class AuthController {
 
   @Get("/logout")
   @GuardOne([jwtMiddleware.accessToken])
-  async logout(req: Request<any, any, { uid: string }>, res: Response) {
+  async logout(req: RequestCustom<any, { uid: string }>, res: Response) {
     let { uid } = req.body;
     let { refresh_token } = req.cookies;
     await this.authService.logout({ uid, refresh_token });
@@ -60,9 +61,9 @@ export class AuthController {
   }
   @Post("/change-password")
   @GuardOne([jwtMiddleware.accessToken])
-  @Validate(userValidateChangePassword)
+  @Validate(authValidateChangePassword)
   async changePassword(
-    req: Request<any, any, authChangePasswordType>,
+    req: RequestCustom<any, any, authChangePasswordType>,
     res: Response
   ) {
     await this.authService.changePassword(req.body);
@@ -71,9 +72,9 @@ export class AuthController {
     });
   }
   @Post("/forgot-password")
-  @Validate(userValidateForgotPassword)
+  @Validate(authValidateForgotPassword)
   async forgotPassword(
-    req: Request<any, any, authForgotPasswordType>,
+    req: RequestCustom<any, any, authForgotPasswordType>,
     res: Response
   ) {
     await this.authService.forgotPassword(req.body);
@@ -82,7 +83,7 @@ export class AuthController {
     });
   }
   @Get("/refresh-token")
-  async refreshToken(req: Request, res: Response) {
+  async refreshToken(req: RequestCustom, res: Response) {
     const refresh_token = req.cookies.refresh_token;
     let { new_access_token, new_refresh_token } =
       await this.authService.refreshToken(refresh_token);
@@ -94,7 +95,7 @@ export class AuthController {
   }
   @Post("/reset-password")
   async resetPassword(
-    req: Request<any, any, authResetPasswordType>,
+    req: RequestCustom<any, authResetPasswordType>,
     res: Response
   ) {
     await this.authService.resetPassword(req.body);
@@ -102,10 +103,9 @@ export class AuthController {
       message: "Reset your password successfully",
     });
   }
-
   @Get("/verify-email")
   async verifyEmail(
-    req: Request<any, any, any, authVerifyEmailType>,
+    req: RequestCustom<any, any, authVerifyEmailType>,
     res: Response
   ) {
     await this.authService.verifyEmail(req.query);

@@ -23,6 +23,7 @@ export function Controllers(prefix: string) {
           ROUTERS_KEY,
           target
         );
+
         routes.forEach((e) => {
           let middlewares = [];
           middlewares.push(
@@ -56,7 +57,6 @@ export function Controllers(prefix: string) {
           if (guardAll) {
             middlewares.unshift(guardAll);
           }
-          console.log(middlewares);
 
           route[e.method](prefix + e.url, ...middlewares);
         });
@@ -73,7 +73,6 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
       descriptor: PropertyDescriptor
     ) => {
       const originalMethod = descriptor.value;
-
       const routes: RouteInfoType[] =
         Reflect.getMetadata(ROUTERS_KEY, target.constructor) || [];
       routes.push({
@@ -89,3 +88,4 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
 
 export const Get = FactoryMethod("get");
 export const Post = FactoryMethod("post");
+export const Patch = FactoryMethod("patch");

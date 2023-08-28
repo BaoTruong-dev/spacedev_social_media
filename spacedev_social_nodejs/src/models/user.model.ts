@@ -5,13 +5,20 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      default: "",
+      default: null,
     },
-
+    avatar: {
+      type: String,
+      default: null,
+    },
     email: {
       type: String,
       unique: true,
       required: true,
+    },
+    date_of_birth: {
+      type: Number,
+      default: null,
     },
     password: {
       type: String,
@@ -26,6 +33,12 @@ const userSchema = new Schema(
       type: String,
       default: undefined,
     },
+    historyChangePassword: [
+      {
+        password: String,
+        date: Date,
+      },
+    ],
   },
   {
     timestamps: true,

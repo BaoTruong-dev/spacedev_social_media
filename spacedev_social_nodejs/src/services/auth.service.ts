@@ -7,6 +7,7 @@ import { UserModel } from "../models/user.model";
 import { generateRandomSalt, hashPassword } from "../utils/crypto";
 import { Token } from "../utils/jwt";
 import { registerMail, resetPasswordMail } from "../utils/mail";
+import { addMonths } from "../utils/date";
 
 export interface authRegisterType {
   email: string;
@@ -60,7 +61,7 @@ export default class AuthService {
   }
   async login({ email, password }: authRegisterType) {
     let passwordAfterHash = hashPassword(password);
-    console.log(passwordAfterHash);
+
     let user = await UserModel.findOne({
       email,
       password: passwordAfterHash,
@@ -109,16 +110,40 @@ export default class AuthService {
   async changePassword({ newPassword, password, uid }: authChangePasswordType) {
     const passwordAfterHash = hashPassword(password);
     const newPasswordAfterHash = hashPassword(newPassword);
-    const user = await UserModel.findOneAndUpdate(
-      { _id: uid, password: passwordAfterHash },
-      {
-        password: newPasswordAfterHash,
-      }
-    );
+    if (passwordAfterHash === newPasswordAfterHash) {
+      throw createHttpError(
+        httpStatus.badRequest,
+        "New password is not same as old password"
+      );
+    }
+    const user = await UserModel.findOne({
+      _id: uid,
+      password: passwordAfterHash,
+    });
 
     if (!user) {
       throw createHttpError(httpStatus.badRequest, "Old password is wrong");
     }
+    user.historyChangePassword.forEach((e) => {
+      const date = e.date as Date;
+      const currentDate = new Date().getTime();
+
+      if (
+        e.password === newPasswordAfterHash &&
+        currentDate - date.getTime() <= 0
+      ) {
+        throw createHttpError(
+          httpStatus.badRequest,
+          "New password is not same as password you changed within 6 months!"
+        );
+      }
+    });
+    user.historyChangePassword.push({
+      password: newPasswordAfterHash,
+      date: addMonths(new Date(), 6),
+    });
+    user.password = newPasswordAfterHash;
+    user.save();
     return user;
   }
   async verifyEmail({ verify_code, email }: authVerifyEmailType) {

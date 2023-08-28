@@ -11,6 +11,11 @@ const tokenModel = new Schema({
     require: true,
     default: "",
   },
+  enable: {
+    type: Boolean,
+    require: true,
+    default: null,
+  },
 });
 
 export const TokenModel = mongoose.model("Tokens", tokenModel);

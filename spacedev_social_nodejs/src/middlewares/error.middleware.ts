@@ -17,9 +17,8 @@ export const handleCatchError = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(error, '----');
-  
-  return  HttpResponse.error(res, error, {
-        code: error.status || httpStatus.internalServerError,
-      })
+  console.log(error, "--");
+  return HttpResponse.error(res, error, {
+    code: error.status || httpStatus.internalServerError,
+  });
 };
