@@ -89,3 +89,4 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
 export const Get = FactoryMethod("get");
 export const Post = FactoryMethod("post");
 export const Patch = FactoryMethod("patch");
+export const Put = FactoryMethod("put");

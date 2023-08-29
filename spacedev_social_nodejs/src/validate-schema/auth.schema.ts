@@ -3,6 +3,7 @@ const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 const rulesRegex =
   /(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`[\]{}|:;"'<>,.?/\\])/;
 export const authValidateRegister = Joi.object({
+  name: Joi.string().required(),
   email: Joi.string().regex(emailRegex).required(),
   password: Joi.string()
     .min(6)

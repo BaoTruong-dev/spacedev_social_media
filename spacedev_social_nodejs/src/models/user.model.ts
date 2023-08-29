@@ -5,7 +5,8 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      default: null,
+      require: true,
+      index: true,
     },
     avatar: {
       type: String,
@@ -17,7 +18,7 @@ const userSchema = new Schema(
       required: true,
     },
     date_of_birth: {
-      type: Number,
+      type: Date,
       default: null,
     },
     password: {

@@ -102,6 +102,13 @@ export default class AuthService {
     if (!user) {
       throw createHttpError(httpStatus.badRequest, "Email is not existed!");
     }
+    const keyExpireIn = await client.ttl(email);
+    if (keyExpireIn > 0) {
+      throw createHttpError(
+        httpStatus.toManyRequests,
+        `Please send mail again after ${keyExpireIn}s`
+      );
+    }
     const code = generateRandomSalt();
     const link = `${process.env.FE_URL}/auth/reset-password?password_code=${code}&&email=${email}`;
     client.setEx(email, 60, code);

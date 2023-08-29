@@ -1,3 +1,4 @@
+import { RequestAuth } from "./../@types/type.d";
 import { RequestCustom } from "../@types/type";
 import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { Request, Response } from "express";
@@ -48,8 +49,8 @@ export default class AuthController {
 
   @Get("/logout")
   @GuardOne([jwtMiddleware.accessToken])
-  async logout(req: RequestCustom<any, { uid: string }>, res: Response) {
-    let { uid } = req.body;
+  async logout(req: RequestAuth, res: Response) {
+    let uid = req.user;
     let { refresh_token } = req.cookies;
     await this.authService.logout({ uid, refresh_token });
     for (const cookieName in req.cookies) {
@@ -63,10 +64,10 @@ export default class AuthController {
   @GuardOne([jwtMiddleware.accessToken])
   @Validate(authValidateChangePassword)
   async changePassword(
-    req: RequestCustom<any, any, authChangePasswordType>,
+    req: RequestAuth<any, any, authChangePasswordType>,
     res: Response
   ) {
-    await this.authService.changePassword(req.body);
+    await this.authService.changePassword({ ...req.body, uid: req.user });
     return HttpResponse.success(res, undefined, {
       message: "Change password successfully",
     });
