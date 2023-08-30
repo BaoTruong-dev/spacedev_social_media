@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { Schema } from "joi";
+import { CustomValidator, LanguageMessages, Schema } from "joi";
+import mongoose, { Types } from "mongoose";
 
 export const validateJoi = (schema: Schema<any>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -15,4 +16,10 @@ export const validateJoi = (schema: Schema<any>) => {
       next(err);
     }
   };
+};
+
+export const validateIsObjectId: CustomValidator = (value, helper) => {
+  if (!mongoose.isValidObjectId(value)) {
+    helper.message("ObjectId is invalid!" as unknown as LanguageMessages);
+  }
 };

@@ -2,6 +2,7 @@ import { httpStatus } from "./../constant/httpStatus";
 import createHttpError from "http-errors";
 import { UserModel } from "./../models/user.model";
 import { Inject, Injectable } from "../decorators/DI-IOC.decorator";
+import { conditionError } from "../utils/checkedError";
 
 export interface UserUpdateInfo {
   name: String;
@@ -21,9 +22,11 @@ export default class UserService {
         ...rest,
       }
     );
-    if (!result) {
-      throw createHttpError(httpStatus.badRequest, "User is not found!");
-    }
+        conditionError(
+          !result,
+         "User is not found!"
+        );
+
     return result;
   }
 }

@@ -10,6 +10,7 @@ export const authValidateRegister = Joi.object({
     .max(32)
     .custom((value, helpers) => {
       let name = helpers.state.ancestors[0].name;
+
       if (value.includes(name)) {
         return helpers.message(
           "Your password's not allowed includes name" as unknown as Joi.LanguageMessages

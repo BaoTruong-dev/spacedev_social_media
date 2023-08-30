@@ -14,7 +14,7 @@ export default class UserController {
   private userService!: UserService;
   @Patch("/update-info")
   @GuardOne([validateJoi(userUpdateSchema)])
-  async updateInfo(req: RequestAuth<any, UserUpdateInfo>, res: Response) {
+  async updateInfo(req: RequestAuth<UserUpdateInfo>, res: Response) {
     await this.userService.updateInfo({ ...req.body, uid: req.user });
     return HttpResponse.updated(res);
   }

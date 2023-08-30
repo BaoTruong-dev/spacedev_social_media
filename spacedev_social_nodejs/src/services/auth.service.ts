@@ -8,26 +8,28 @@ import { generateRandomSalt, hashPassword } from "../utils/crypto";
 import { Token } from "../utils/jwt";
 import { registerMail, resetPasswordMail } from "../utils/mail";
 import { addMonths } from "../utils/date";
+import { conditionError } from "../utils/checkedError";
 
 export interface authRegisterType {
   email: string;
   password: string;
+  name: string
 }
 
 export interface authLoginType extends authRegisterType {}
 
 export interface authChangePasswordType {
   uid: string;
-  password: authRegisterType["password"];
+  password: string;
   newPassword: string;
 }
 
 export interface authForgotPasswordType {
-  email: authRegisterType["email"];
+  email: string;
 }
 
 export interface authVerifyEmailType {
-  email: authRegisterType["email"];
+  email: string;
   verify_code: string;
 }
 
@@ -37,17 +39,16 @@ export interface authLogoutType {
 }
 
 export interface authResetPasswordType {
-  email: authRegisterType["email"];
+  email: string;
   password_code: string;
   newPassword: string;
 }
 @Injectable
 export default class AuthService {
-  async register({ email, password }: authRegisterType) {
+  async register({ email, password, name }: authRegisterType) {
     let user = await UserModel.findOne({ email });
-    if (user) {
-      throw createHttpError(httpStatus.badRequest, "Email is already existed");
-    }
+    conditionError(user, "Email is already existed");
+
     const code = generateRandomSalt();
     const passwordAfterHash = hashPassword(password);
     const link = `${process.env.BE_URL}/auth/verify-email?verify_code=${code}&&email=${email}`;
@@ -56,6 +57,7 @@ export default class AuthService {
     return await UserModel.create({
       email,
       password: passwordAfterHash,
+      name,
       verify_email_code: code,
     });
   }
@@ -67,17 +69,12 @@ export default class AuthService {
       password: passwordAfterHash,
     });
     if (!user) {
-      throw createHttpError(
-        httpStatus.badRequest,
-        "Email or password is wrong"
-      );
+      throw createHttpError(httpStatus.notFound, "Email or password is wrong");
     }
-    if (!user.verify) {
-      throw createHttpError(
-        httpStatus.badRequest,
-        "Please verify your account through your email before login"
-      );
-    }
+    conditionError(
+      !user.verify,
+      "Please verify your account through your email before login"
+    );
     const access_token = Token.accessToken({ uid: user._id });
     const refresh_token = Token.refreshToken({ uid: user._id });
     await TokenModel.create({
@@ -99,16 +96,13 @@ export default class AuthService {
     let user = await UserModel.findOne({
       email,
     });
-    if (!user) {
-      throw createHttpError(httpStatus.badRequest, "Email is not existed!");
-    }
+    conditionError(!user, "Email is not existed!");
     const keyExpireIn = await client.ttl(email);
-    if (keyExpireIn > 0) {
-      throw createHttpError(
-        httpStatus.toManyRequests,
-        `Please send mail again after ${keyExpireIn}s`
-      );
-    }
+    conditionError(
+      keyExpireIn > 0,
+      `Please send mail again after ${keyExpireIn}s`,
+      httpStatus.toManyRequests
+    );
     const code = generateRandomSalt();
     const link = `${process.env.FE_URL}/auth/reset-password?password_code=${code}&&email=${email}`;
     client.setEx(email, 60, code);
@@ -117,50 +111,47 @@ export default class AuthService {
   async changePassword({ newPassword, password, uid }: authChangePasswordType) {
     const passwordAfterHash = hashPassword(password);
     const newPasswordAfterHash = hashPassword(newPassword);
-    if (passwordAfterHash === newPasswordAfterHash) {
-      throw createHttpError(
-        httpStatus.badRequest,
-        "New password is not same as old password"
-      );
-    }
+    conditionError(
+      passwordAfterHash === newPasswordAfterHash,
+      "New password is not same as old password"
+    );
+
     const user = await UserModel.findOne({
       _id: uid,
       password: passwordAfterHash,
     });
+    conditionError(!user, "Old password is wrong");
+    if (user) {
+      user.historyChangePassword.forEach((e) => {
+        const date = e.date as Date;
+        const currentDate = new Date().getTime();
 
-    if (!user) {
-      throw createHttpError(httpStatus.badRequest, "Old password is wrong");
+        if (
+          e.password === newPasswordAfterHash &&
+          currentDate - date.getTime() <= 0
+        ) {
+          throw createHttpError(
+            httpStatus.badRequest,
+            "New password is not same as password you changed within 6 months!"
+          );
+        }
+      });
+      user.historyChangePassword.push({
+        password: newPasswordAfterHash,
+        date: addMonths(new Date(), 6),
+      });
+      user.password = newPasswordAfterHash;
+      user.save();
+      return user;
     }
-    user.historyChangePassword.forEach((e) => {
-      const date = e.date as Date;
-      const currentDate = new Date().getTime();
-
-      if (
-        e.password === newPasswordAfterHash &&
-        currentDate - date.getTime() <= 0
-      ) {
-        throw createHttpError(
-          httpStatus.badRequest,
-          "New password is not same as password you changed within 6 months!"
-        );
-      }
-    });
-    user.historyChangePassword.push({
-      password: newPasswordAfterHash,
-      date: addMonths(new Date(), 6),
-    });
-    user.password = newPasswordAfterHash;
-    user.save();
-    return user;
   }
   async verifyEmail({ verify_code, email }: authVerifyEmailType) {
     let user = await UserModel.findOne({ email });
     if (!user) {
       throw createHttpError(httpStatus.notFound, "User is not found!");
     }
-    if (!(verify_code === user.verify_email_code)) {
-      throw createHttpError(httpStatus.badRequest, "Code is wrong!");
-    }
+    conditionError(!(verify_code === user.verify_email_code), "Code is wrong!");
+
     user.verify = true;
     user.verify_email_code = undefined;
     await user.save();
@@ -192,9 +183,7 @@ export default class AuthService {
     newPassword,
   }: authResetPasswordType) {
     let codeInCatch = await client.get(email);
-    if (!(codeInCatch === password_code)) {
-      throw createHttpError(httpStatus.badRequest, "Code or email is wrong!");
-    }
+    conditionError(!(codeInCatch === password_code), "Code or email is wrong!");
     const hashNewPassword = hashPassword(newPassword);
     await client.del(email);
     return await UserModel.findOneAndUpdate(

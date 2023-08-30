@@ -6,7 +6,7 @@ const userSchema = new Schema(
     name: {
       type: String,
       require: true,
-      index: true,
+      index: "text",
     },
     avatar: {
       type: String,

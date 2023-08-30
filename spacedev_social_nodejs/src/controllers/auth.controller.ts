@@ -30,13 +30,13 @@ export default class AuthController {
 
   @Post("/register")
   @Validate(authValidateRegister)
-  async register(req: RequestCustom<any, authRegisterType>, res: Response) {
+  async register(req: RequestCustom<authRegisterType>, res: Response) {
     await this.authService.register(req.body);
     return HttpResponse.created(res);
   }
   @Post("/login")
   @Validate(authValidateLogin)
-  async login(req: RequestCustom<any, authLoginType>, res: Response) {
+  async login(req: RequestCustom<authLoginType>, res: Response) {
     let { refresh_token, access_token } = await this.authService.login(
       req.body
     );
@@ -64,7 +64,7 @@ export default class AuthController {
   @GuardOne([jwtMiddleware.accessToken])
   @Validate(authValidateChangePassword)
   async changePassword(
-    req: RequestAuth<any, any, authChangePasswordType>,
+    req: RequestAuth<authChangePasswordType>,
     res: Response
   ) {
     await this.authService.changePassword({ ...req.body, uid: req.user });
@@ -75,7 +75,7 @@ export default class AuthController {
   @Post("/forgot-password")
   @Validate(authValidateForgotPassword)
   async forgotPassword(
-    req: RequestCustom<any, any, authForgotPasswordType>,
+    req: RequestCustom<authForgotPasswordType>,
     res: Response
   ) {
     await this.authService.forgotPassword(req.body);
@@ -106,7 +106,7 @@ export default class AuthController {
   }
   @Get("/verify-email")
   async verifyEmail(
-    req: RequestCustom<any, any, authVerifyEmailType>,
+    req: RequestCustom<any,authVerifyEmailType>,
     res: Response
   ) {
     await this.authService.verifyEmail(req.query);

@@ -1,14 +1,14 @@
 import { Request } from "express";
 export interface RequestCustom<
-  Params extends any = {},
   ReqBody extends any = {},
-  ReqQuery extends any = {}
+  ReqQuery extends any = {},
+  Params extends any = {}
 > extends Request<Params, any, ReqBody, ReqQuery> {}
 
 export interface RequestAuth<
-  Params extends any = {},
   ReqBody extends any = {},
-  ReqQuery extends any = {}
-> extends RequestCustom<Params, ReqBody, ReqQuery> {
+  ReqQuery extends any = {},
+  Params extends any = {}
+> extends RequestCustom<ReqBody, ReqQuery, Params> {
   user: string;
 }
