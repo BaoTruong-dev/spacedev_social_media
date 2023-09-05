@@ -63,7 +63,6 @@ export default class FriendService {
           awaitFriend.push(user);
         }
       });
-      result.push(user)
     });
     return [...isFriend, ...awaitFriend, ...result];
   }

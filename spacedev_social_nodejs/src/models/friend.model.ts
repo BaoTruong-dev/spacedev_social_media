@@ -16,4 +16,6 @@ export const friendModel = new Schema({
   },
 });
 
+
+
 export const FriendModel = mongoose.model("Friends", friendModel);

@@ -2,10 +2,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
-import multer from "multer";
 import path from "path";
 import "../config/db.config";
 import "../config/redis.config";
+
 import {
   handleCatchError,
   NotMatchedRoute,
@@ -28,9 +28,7 @@ export function AppDecorator(options: AppDecoratorOptions) {
         this.app.use(cors());
         this.app.use(cookieParser());
         this.app.use(express.urlencoded({ extended: true }));
-
         this.app.use("/upload", express.static(path.join(__dirname, "upload")));
-
         controllers.forEach((controller) => {
           new controller(this.app);
         });
@@ -40,10 +38,14 @@ export function AppDecorator(options: AppDecoratorOptions) {
       listen(port: string | number, cb: () => void) {
         this.app.listen(port, cb);
       }
+      use(...args: any[]): void {
+        this.app.use(...args);
+      }
     };
   };
 }
 
 export class BaseApp {
   listen(port: string | number, cb: () => void) {}
+  use(...args: any[]) {}
 }

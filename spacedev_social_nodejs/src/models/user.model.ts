@@ -8,6 +8,11 @@ const userSchema = new Schema(
       require: true,
       index: "text",
     },
+    cover: {
+      type: String,
+      default: null,
+    },
+    nickName: String,
     avatar: {
       type: String,
       default: null,
@@ -45,5 +50,15 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
+
+export const userSchemaQl = `
+  type User{
+    name: String
+    avatar: String
+    cover: String
+    nickName: String
+    
+  }
+`;
 
 export const UserModel = mongoose.model("Users", userSchema);
