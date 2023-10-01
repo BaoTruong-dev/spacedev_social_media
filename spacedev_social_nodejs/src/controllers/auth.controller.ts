@@ -1,3 +1,6 @@
+import { RequestAuth } from "./../@types/type.d";
+import { RequestCustom } from "../@types/type";
+import { jwtMiddleware } from "../middlewares/jwt.middleware";
 import { Request, Response } from "express";
 import { Controllers, Get, Post } from "../decorators/Controller.decorator";
 import { Validate } from "../decorators/Validate.decorator";
@@ -7,50 +10,106 @@ import {
   authLoginType,
   authRegisterType,
   authVerifyEmailType,
+  authForgotPasswordType,
+  authResetPasswordType,
 } from "../services/auth.service";
 import { HttpResponse } from "../utils/HttpResponse";
 import {
-  userValidateChangePassword,
-  userValidateLogin,
-  userValidateRegister,
-} from "../validate-schema/user.schema";
+  authValidateChangePassword,
+  authValidateForgotPassword,
+  authValidateLogin,
+  authValidateRegister,
+} from "../validate-schema/auth.schema";
 import { GuardOne } from "../decorators/Guard.decorator";
+import { Inject } from "../decorators/DI-IOC.decorator";
 
 @Controllers("/auth")
-export class AuthController {
+export default class AuthController {
+  @Inject(AuthService)
+  private authService!: AuthService;
+
   @Post("/register")
-  @Validate(userValidateRegister)
-  async register(req: Request<any, any, authRegisterType>, res: Response) {
-    await AuthService.register(req.body);
+  @Validate(authValidateRegister)
+  async register(req: RequestCustom<authRegisterType>, res: Response) {
+    await this.authService.register(req.body);
     return HttpResponse.created(res);
   }
   @Post("/login")
-  @Validate(userValidateLogin)
-  async login(req: Request<any, any, authLoginType>, res: Response) {
-    let result = await AuthService.login(req.body);
-    return HttpResponse.success(res, result, {
+  @Validate(authValidateLogin)
+  async login(req: RequestCustom<authLoginType>, res: Response) {
+    let { refresh_token, access_token } = await this.authService.login(
+      req.body
+    );
+    res.cookie("access_token", access_token);
+    res.cookie("refresh_token", refresh_token);
+    return HttpResponse.success(res, undefined, {
       message: "Login successfully",
     });
   }
+
+  @Get("/logout")
+  @GuardOne([jwtMiddleware.accessToken])
+  async logout(req: RequestAuth, res: Response) {
+    let uid = req.user;
+    let { refresh_token } = req.cookies;
+    await this.authService.logout({ uid, refresh_token });
+    for (const cookieName in req.cookies) {
+      res.clearCookie(cookieName);
+    }
+    return HttpResponse.success(res, undefined, {
+      message: "Logout successfully",
+    });
+  }
   @Post("/change-password")
-  @GuardOne
-  @Validate(userValidateChangePassword)
+  @GuardOne([jwtMiddleware.accessToken])
+  @Validate(authValidateChangePassword)
   async changePassword(
-    req: Request<any, any, authChangePasswordType>,
+    req: RequestAuth<authChangePasswordType>,
     res: Response
   ) {
-    await AuthService.changePassword(req.body);
+    await this.authService.changePassword({ ...req.body, uid: req.user });
     return HttpResponse.success(res, undefined, {
       message: "Change password successfully",
     });
   }
-
-  @Get("/verify-email")
-  async verifyEmail(
-    req: Request<any, any, any, authVerifyEmailType>,
+  @Post("/forgot-password")
+  @Validate(authValidateForgotPassword)
+  async forgotPassword(
+    req: RequestCustom<authForgotPasswordType>,
     res: Response
   ) {
-    await AuthService.verifyEmail(req.query);
+    await this.authService.forgotPassword(req.body);
+    return HttpResponse.success(res, undefined, {
+      message: "Check your email to reset your password!",
+    });
+  }
+  @Get("/refresh-token")
+  async refreshToken(req: RequestCustom, res: Response) {
+    const refresh_token = req.cookies.refresh_token;
+    let { new_access_token, new_refresh_token } =
+      await this.authService.refreshToken(refresh_token);
+    res.cookie("access_token", new_access_token);
+    res.cookie("refresh_token", new_refresh_token);
+    return HttpResponse.success(res, undefined, {
+      message: "Refresh Token successfully",
+    });
+  }
+  @Post("/reset-password")
+  async resetPassword(
+    req: RequestCustom<any, authResetPasswordType>,
+    res: Response
+  ) {
+    await this.authService.resetPassword(req.body);
+    return HttpResponse.success(res, undefined, {
+      message: "Reset your password successfully",
+    });
+  }
+  @Get("/verify-email")
+  async verifyEmail(
+    req: RequestCustom<any,authVerifyEmailType>,
+    res: Response
+  ) {
+    await this.authService.verifyEmail(req.query);
     return HttpResponse.success(res, undefined, {
       message: "Verify your account successfully!",
     });

@@ -1,4 +1,4 @@
-import { GUARD_ONE_KEY } from "./../constant/metadataKey";
+import { GUARD_KEY } from "./../constant/metadataKey";
 import { Express, NextFunction, Request, Response, Router } from "express";
 
 import "reflect-metadata";
@@ -23,12 +23,13 @@ export function Controllers(prefix: string) {
           ROUTERS_KEY,
           target
         );
+
         routes.forEach((e) => {
           let middlewares = [];
           middlewares.push(
             async (req: Request, res: Response, next: NextFunction) => {
               try {
-                await e.handler(req, res);
+                await e.handler.apply(this, [req, res]);
               } catch (error) {
                 next(error);
               }
@@ -39,15 +40,24 @@ export function Controllers(prefix: string) {
             target
           );
           const guardOne = Reflect.getMetadata(
-            GUARD_ONE_KEY + e.propertyKey,
-            target
+            GUARD_KEY,
+            target,
+            e.propertyKey
           );
+
+          const guardAll = Reflect.getMetadata(GUARD_KEY, target);
           if (validate) {
             middlewares.unshift(validate);
           }
           if (guardOne) {
-            middlewares.unshift(guardOne);
+            for (let i = guardOne.length - 1; i >= 0; i--) {
+              middlewares.unshift(guardOne[i]);
+            }
           }
+          if (guardAll) {
+            middlewares.unshift(guardAll);
+          }
+
           route[e.method](prefix + e.url, ...middlewares);
         });
         this.app.use(route);
@@ -63,7 +73,6 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
       descriptor: PropertyDescriptor
     ) => {
       const originalMethod = descriptor.value;
-
       const routes: RouteInfoType[] =
         Reflect.getMetadata(ROUTERS_KEY, target.constructor) || [];
       routes.push({
@@ -79,3 +88,5 @@ function FactoryMethod(method: "get" | "put" | "patch" | "post" | "delete") {
 
 export const Get = FactoryMethod("get");
 export const Post = FactoryMethod("post");
+export const Patch = FactoryMethod("patch");
+export const Put = FactoryMethod("put");

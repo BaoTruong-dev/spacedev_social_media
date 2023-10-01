@@ -5,16 +5,26 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      default: "",
+      require: true,
+      index: "text",
     },
-    refresh_token: {
+    cover: {
       type: String,
-      default: "",
+      default: null,
+    },
+    nickName: String,
+    avatar: {
+      type: String,
+      default: null,
     },
     email: {
       type: String,
       unique: true,
       required: true,
+    },
+    date_of_birth: {
+      type: Date,
+      default: null,
     },
     password: {
       type: String,
@@ -29,10 +39,26 @@ const userSchema = new Schema(
       type: String,
       default: undefined,
     },
+    historyChangePassword: [
+      {
+        password: String,
+        date: Date,
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+export const userSchemaQl = `
+  type User{
+    name: String
+    avatar: String
+    cover: String
+    nickName: String
+    
+  }
+`;
 
 export const UserModel = mongoose.model("Users", userSchema);
