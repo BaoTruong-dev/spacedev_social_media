@@ -24,7 +24,7 @@ export const Modal: FC<ModalProps> = ({ width, ...props }) => {
     }
     return () => {
       document.body.classList.remove("overflow-hidden");
-    }
+    };
   }, [props.open]);
 
   if (!props.open) return null;
@@ -55,7 +55,7 @@ export const Modal: FC<ModalProps> = ({ width, ...props }) => {
       >
         <div className="relative">
           {props.title && (
-            <h2 className="dark:border-slate-700 p-3 text-center text-2xl font-bold border-b border-solid border-gray-300">
+            <h2 className="p-3 text-2xl font-bold text-center border-b border-gray-300 border-solid dark:border-slate-700">
               {props.title}
             </h2>
           )}
