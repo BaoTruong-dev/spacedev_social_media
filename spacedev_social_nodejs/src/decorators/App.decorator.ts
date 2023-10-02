@@ -32,11 +32,12 @@ export function AppDecorator(options: AppDecoratorOptions) {
         controllers.forEach((controller) => {
           new controller(this.app);
         });
-        this.app.use(NotMatchedRoute);
+
         this.app.use(handleCatchError);
       }
       listen(port: string | number, cb: () => void) {
         this.app.listen(port, cb);
+        this.app.use(NotMatchedRoute);
       }
       use(...args: any[]): void {
         this.app.use(...args);

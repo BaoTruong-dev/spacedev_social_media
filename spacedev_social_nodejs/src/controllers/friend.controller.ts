@@ -20,6 +20,9 @@ export default class FriendController {
   async searchFriend(req: RequestAuth<any, { q: string }>, res: Response) {
     const _id = req.user;
     const { q } = req.query;
+    if (!q) {
+      throw createHttpError(httpStatus.badRequest, "Search key is required");
+    }
     const friendList = await this.friendService.searchPeople(_id, q);
     return HttpResponse.success(res, friendList);
   }

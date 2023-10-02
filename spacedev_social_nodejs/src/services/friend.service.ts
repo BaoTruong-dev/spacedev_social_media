@@ -43,26 +43,44 @@ export default class FriendService {
         };
       }
     });
-    const userList = await UserModel.find({
-      verify: true,
-      $text: {
-        $search: search,
+    const userList = await UserModel.aggregate([
+      {
+        $match: {
+          verify: true,
+          $text: {
+            $search: search,
+          },
+        },
       },
-    }).select("_id avatar name");
+      {
+        $project: {
+          _id: 1,
+          avatar: 1,
+          name: 1,
+        },
+      },
+
+      {
+        $limit: 100,
+      },
+    ]);
     const result: any[] = [];
     const isFriend: any[] = [];
     const awaitFriend: any[] = [];
-    console.log(filterFriendList);
-
+    const filterFriendSet = new Set(filterFriendList.map((e) => e.id));
     userList.forEach((user) => {
-      filterFriendList.forEach((e) => {
-        if (e.id === user._id.toString() && e.confirm) {
-          isFriend.push(user);
-        }
-        if (e.id === user._id.toString() && !e.confirm) {
-          awaitFriend.push(user);
-        }
-      });
+      if (filterFriendSet.has(user._id.toString())) {
+        filterFriendList.forEach((e) => {
+          if (e.id === user._id.toString() && e.confirm) {
+            isFriend.push(user);
+          }
+          if (e.id === user._id.toString() && !e.confirm) {
+            awaitFriend.push(user);
+          }
+        });
+      } else {
+        result.push(user);
+      }
     });
     return [...isFriend, ...awaitFriend, ...result];
   }
