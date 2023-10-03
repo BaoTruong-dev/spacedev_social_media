@@ -9,13 +9,6 @@ export const authValidateRegister = Joi.object({
     .min(6)
     .max(32)
     .custom((value, helpers) => {
-      let name = helpers.state.ancestors[0].name;
-
-      if (value.includes(name)) {
-        return helpers.message(
-          "Your password's not allowed includes name" as unknown as Joi.LanguageMessages
-        );
-      }
       if (!rulesRegex.test(value)) {
         return helpers.message(
           "Your password must include uppercase letters, lowercase letters, special characters, and number" as unknown as Joi.LanguageMessages
