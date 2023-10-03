@@ -10,6 +10,7 @@ import { NewPost } from "../components/NewPost";
 import { Post } from "../components/Post";
 import { ButtonIconCamera } from "../components/Icon/IconCamera";
 import { ModalAbout } from "../components/features/About";
+import { Link } from "react-router-dom";
 
 export const Profile = () => {
   const [open, setOpen] = useState(false);
@@ -22,7 +23,7 @@ export const Profile = () => {
         <div className="bg-white dark:bg-slate-900">
           <div className="relative">
             <div>
-              <img src="https://unsplash.it/2000/700" />
+              <img alt="" src="https://unsplash.it/2000/700" />
             </div>
             <div className="container relative mx-auto">
               <div className="cursor-pointer hover:bg-opacity-60 absolute bottom-2 right-2 bg-black rounded bg-opacity-50 text-white  text-sm flex items-center px-2 py-0.5 drop-shadow-2xl shadow-white">
@@ -155,14 +156,15 @@ export const Profile = () => {
               >
                 <div className="mt-3 gap-3 grid grid-cols-3 flex-wrap">
                   {[...new Array(9)].map((_, i) => (
-                    <a key={i} href="#" className="">
+                    <Link key={i} to="#" className="">
                       <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                         <img
+                          alt=""
                           className="object-cover w-full h-full"
                           src={`https://unsplash.it/150/150?t=${Math.random()}`}
                         />
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </Card>
@@ -185,6 +187,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -196,6 +199,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -207,6 +211,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -218,6 +223,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -229,6 +235,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -240,6 +247,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -251,6 +259,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -262,6 +271,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />
@@ -273,6 +283,7 @@ export const Profile = () => {
                   <a href="#" className="">
                     <div className="rounded-lg flex-1 overflow-hidden aspect-square">
                       <img
+                        alt=""
                         className="object-cover w-full h-full"
                         src={`https://unsplash.it/150/150?t=${Math.random()}`}
                       />

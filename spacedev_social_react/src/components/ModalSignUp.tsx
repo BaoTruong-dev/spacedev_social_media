@@ -1,29 +1,48 @@
-import { FC } from "react";
-import { Modal, ModalProps } from "./Modal";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { message } from "antd";
+import { FC, useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useMutation } from "react-query";
+import * as yup from "yup";
+import { userSchema } from "../schema/user.schema";
+import authService from "../services/auth.service";
+import { setGlobalState } from "../store/queryClient";
+import { Button } from "./Button";
+import IconPassword from "./Icon/IconPassword";
 import { IconUser } from "./Icon/IconUser";
 import InputIcon from "./InputIcon";
-import IconPassword from "./Icon/IconPassword";
-import { Button } from "./Button";
-import { SubmitHandler, useForm } from "react-hook-form";
-
-interface RegisterInPutType {
-  name: string;
-  email: string;
-  password: string;
-}
+import { Modal, ModalProps } from "./Modal";
+export type RegisterInPutType = yup.InferType<typeof userSchema>;
 
 const ModalSignUp: FC<ModalProps> = (props) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm<RegisterInPutType>({ mode: "onChange" });
+  } = useForm<RegisterInPutType>({
+    mode: "onChange",
+    resolver: yupResolver(userSchema),
+  });
+  const { mutate, isLoading } = useMutation({
+    mutationFn: authService.register,
+    onSuccess: (response) => {
+      message.success(response.data.message);
+      props.onCancel?.();
+      setGlobalState("LOGIN_MODAL", false);
+    },
+    onError: (error: string) => {
+      message.error(error);
+    },
+  });
   const onSubmit: SubmitHandler<RegisterInPutType> = (data) => {
-    console.log(data, "data");
+    mutate(data);
   };
+  useEffect(() => {
+    reset();
+  }, [props.open, reset]);
   return (
     <Modal {...props}>
-      <div onClick={(e) => e}></div>
       <form
         className="w-[420px] px-4 py-8 flex flex-col gap-4"
         onSubmit={handleSubmit(onSubmit)}
@@ -32,33 +51,22 @@ const ModalSignUp: FC<ModalProps> = (props) => {
           icon={<IconUser />}
           placeHolder="Your name"
           error={errors.name?.message}
-          {...register("name", {
-            required: "This field is mandatory",
-          })}
+          {...register("name")}
         />
         <InputIcon
           icon={<IconUser />}
           placeHolder="Your email"
           error={errors.email?.message}
-          {...register("email", {
-            required: "This field is mandatory",
-            pattern: {
-              // eslint-disable-next-line no-useless-escape
-              value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-              message: "Email format is invalid",
-            },
-          })}
+          {...register("email")}
         />
         <InputIcon
-          {...register("password", {
-            required: "This field is mandatory",
-          })}
+          {...register("password")}
           error={errors.password?.message}
           icon={<IconPassword />}
           placeHolder="Your password"
           type="password"
         />
-        <Button type="primary" className="mt-4">
+        <Button type="primary" className="mt-4" disabled={isLoading}>
           Register
         </Button>
       </form>

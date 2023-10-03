@@ -41,7 +41,7 @@ export const Activity = () => {
             </p>
           </div>
           <div className="rounded overflow-hidden w-8 h-8">
-            <img className="w-full h-full" src="https://unsplash.it/50/50" />
+            <img alt="" className="w-full h-full" src="https://unsplash.it/50/50" />
           </div>
         </div>
         <div className="flex gap-2 items-center">
@@ -64,6 +64,7 @@ export const Activity = () => {
           </div>
           <div className="rounded overflow-hidden w-8 h-8">
             <img
+              alt=""
               className="w-full h-full"
               src="https://unsplash.it/50/50?t=2"
             />

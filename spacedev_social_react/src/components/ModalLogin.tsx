@@ -1,11 +1,19 @@
-import { FC, useState } from "react";
-import { Modal, ModalProps } from "./Modal";
-import { IconQR } from "./Icon/IconQR";
-import { ButtonIconUser } from "./Icon/IconUser";
+import { FC, useEffect, useState } from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import { useAuth } from "./AuthProvider";
 import { IconFacebook } from "./Icon/IconFacebook";
 import { IconInstagram } from "./Icon/IconInstagram";
+import { IconQR } from "./Icon/IconQR";
 import { IconTwitter } from "./Icon/IconTwitter";
-import { useAuth } from "./AuthProvider";
+import { ButtonIconUser } from "./Icon/IconUser";
+import { Modal, ModalProps } from "./Modal";
+import { ModalForgotPassword } from "./ModalForgotPassword";
+import { ModalResetPassword } from "./ModalResetPassword";
 import ModalSignIn from "./ModalSignIn";
 import ModalSignUp from "./ModalSignUp";
 
@@ -13,7 +21,18 @@ export const ModalLogin: FC<ModalProps> = ({ ...props }) => {
   const { login } = useAuth();
   const [isLoginEmail, setIsLoginEmail] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
+  const [isReset, setIsReset] = useState(false);
+  const navigate = useNavigate();
+  const { search } = useLocation();
 
+  useEffect(() => {
+    if (search.includes("isReset")) {
+      setIsReset(true);
+    } else {
+      setIsReset(false);
+    }
+  }, [search]);
   return (
     <>
       <Modal {...props} title="Log in by">
@@ -127,12 +146,25 @@ export const ModalLogin: FC<ModalProps> = ({ ...props }) => {
       <ModalSignIn
         open={isLoginEmail}
         onCancel={() => setIsLoginEmail(false)}
+        onOpenForgot={() => setIsForgot(true)}
         title="Login in by email"
       />
       <ModalSignUp
         open={isRegister}
         onCancel={() => setIsRegister(false)}
         title="Sign up for free"
+      />
+      <ModalForgotPassword
+        open={isForgot}
+        onCancel={() => setIsForgot(false)}
+        title="Forgot password"
+      />
+      <ModalResetPassword
+        open={isReset}
+        onCancel={() => {
+          navigate("");
+        }}
+        title="Reset password"
       />
     </>
   );

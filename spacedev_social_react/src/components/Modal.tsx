@@ -5,6 +5,7 @@ import { cn } from "../utils";
 
 export interface ModalProps {
   open?: boolean;
+  onOpenForgot?: () => void;
   onCancel?: () => void;
   children?: any;
   title?: any;
@@ -32,9 +33,7 @@ export const Modal: FC<ModalProps> = ({ width, ...props }) => {
   return createPortal(
     <div
       onClick={(ev) => {
-        if (props.overlayCloseable && !checkClickInsideRef.current) {
-          props.onCancel?.();
-        }
+        props.onCancel?.();
         checkClickInsideRef.current = false;
       }}
       className={

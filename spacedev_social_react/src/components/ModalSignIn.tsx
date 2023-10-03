@@ -1,15 +1,16 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FC } from "react";
-import { Modal, ModalProps } from "./Modal";
+import { SubmitHandler, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { userSchema } from "../schema/user.schema";
+import { Button } from "./Button";
+import IconPassword from "./Icon/IconPassword";
 import { IconUser } from "./Icon/IconUser";
 import InputIcon from "./InputIcon";
-import IconPassword from "./Icon/IconPassword";
-import { Button } from "./Button";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Modal, ModalProps } from "./Modal";
 
-interface LoginInPutType {
-  email: string;
-  password: string;
-}
+const userLoginSchema = userSchema.omit(["name"]);
+type LoginInPutType = yup.InferType<typeof userLoginSchema>;
 
 const ModalSignIn: FC<ModalProps> = (props) => {
   const {
@@ -17,11 +18,14 @@ const ModalSignIn: FC<ModalProps> = (props) => {
     handleSubmit,
 
     formState: { errors },
-  } = useForm<LoginInPutType>({ mode: "onChange" });
+  } = useForm<LoginInPutType>({
+    mode: "onChange",
+    resolver: yupResolver(userLoginSchema),
+  });
   const onSubmit: SubmitHandler<LoginInPutType> = (data) => {
     console.log(data, "data");
   };
-  console.log(errors, "error");
+
   return (
     <Modal {...props}>
       <div onClick={(e) => e}></div>
@@ -33,24 +37,26 @@ const ModalSignIn: FC<ModalProps> = (props) => {
           icon={<IconUser />}
           placeHolder="Your email"
           error={errors.email?.message}
-          {...register("email", {
-            required: "This field is mandatory",
-            pattern: {
-              // eslint-disable-next-line no-useless-escape
-              value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
-              message: "Email format is invalid",
-            },
-          })}
+          {...register("email")}
         />
         <InputIcon
-          {...register("password", {
-            required: "This field is mandatory",
-          })}
+          {...register("password")}
           error={errors.password?.message}
           icon={<IconPassword />}
           placeHolder="Your password"
           type="password"
         />
+        <div className="flex justify-end">
+          <div
+            className="text-sm text-blue-500 text-semibold cursor-pointer"
+            onClick={() => {
+              props.onOpenForgot?.();
+              props.onCancel?.();
+            }}
+          >
+            Forgot password?
+          </div>
+        </div>
         <Button type="primary" className="mt-4">
           Login
         </Button>

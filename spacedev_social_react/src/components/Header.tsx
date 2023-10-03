@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PATH } from "../constants/path";
+import { setGlobalState, useGlobalState } from "../store/queryClient";
 import { useAuth } from "./AuthProvider";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
@@ -21,11 +22,15 @@ import { Switch } from "./Switch";
 
 export const Header = () => {
   const { mode, toggleMode } = useMode();
-  const [openLogin, setOpenLogin] = useState(false);
+  const openLogin = useGlobalState("LOGIN_MODAL");
+
   const { user, logout } = useAuth();
   return (
     <>
-      <ModalLogin open={openLogin} onCancel={() => setOpenLogin(false)} />
+      <ModalLogin
+        open={openLogin}
+        onCancel={() => setGlobalState("LOGIN_MODAL", false)}
+      />
       <header className="sticky top-0 z-10 flex px-4 bg-white border-b border-solid dark:bg-slate-900 h-header border-slate-300 dark:border-slate-700">
         <div className="flex items-center w-full gap-4">
           <div className="w-sidebar">
@@ -35,6 +40,7 @@ export const Header = () => {
             >
               {/* Fucin<span className="text-black px-1 ml-1 leading-8 inline-flex items-center rounded bg-[#ea8f1c]">srule</span> */}
               <img
+                alt=""
                 src="https://spacedev.vn/images/LOGO-image-full.svg"
                 className="w-[25px]"
               />
@@ -114,7 +120,6 @@ export const Header = () => {
               </svg>
 
               <input
-                onClick={() => {}}
                 placeholder="Search for everything...."
                 className="flex-1 text-black bg-transparent outline-none placeholder:text-sm dark:text-white"
               />
@@ -572,8 +577,11 @@ export const Header = () => {
               </>
             ) : (
               <div className="flex items-center gap-3">
-                <Button type="red" onClick={() => setOpenLogin(true)}>
-                  Đăng nhập
+                <Button
+                  type="red"
+                  onClick={() => setGlobalState("LOGIN_MODAL", true)}
+                >
+                  Sign up
                 </Button>
                 <Dropdown
                   getPopupContainer={(parentNode) => parentNode}

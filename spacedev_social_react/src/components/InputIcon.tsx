@@ -29,7 +29,7 @@ function InputIcon(
           {...props}
           type={type}
           placeholder={placeHolder}
-          className={`border-none outline-none ${className}`}
+          className={`border-none outline-none ${className} w-full`}
         />
       </div>
       {error && <div className="text-sm text-red-500">{error}</div>}

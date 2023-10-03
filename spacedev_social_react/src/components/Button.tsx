@@ -1,3 +1,4 @@
+import { ConfigProvider, Spin } from "antd";
 import { FC } from "react";
 import { cn } from "../utils";
 
@@ -31,19 +32,30 @@ export const Button: FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <button
-      {...props}
-      className={cn(
-        "font-semibold rounded border-current border-solid",
-        props.className,
-        sizeClass[size],
-        typeClass[type],
-        {
-          "opacity-50 pointer-events-none": props.disabled,
-        }
-      )}
+    <ConfigProvider
+      theme={{
+        components: {
+          Spin: {
+            colorPrimary: "white",
+          },
+        },
+      }}
     >
-      {props.children}
-    </button>
+      <button
+        {...props}
+        className={cn(
+          "font-semibold rounded border-current border-solid cursor-pointer",
+          props.className,
+          sizeClass[size],
+          typeClass[type],
+          {
+            "pointer-events-none opacity-50": props.disabled,
+          }
+        )}
+      >
+        <Spin spinning={Boolean(props.disabled)} className="mr-2" />
+        {props.children}
+      </button>
+    </ConfigProvider>
   );
 };
