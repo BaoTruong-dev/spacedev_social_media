@@ -1,8 +1,13 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FC } from "react";
+import { message } from "antd";
+import { FC, useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useMutation } from "react-query";
 import * as yup from "yup";
 import { userSchema } from "../schema/user.schema";
+import authService from "../services/auth.service";
+import { setGlobalState } from "../store/queryClient";
+import { createStorage } from "../utils/createStorage";
 import { Button } from "./Button";
 import IconPassword from "./Icon/IconPassword";
 import { IconUser } from "./Icon/IconUser";
@@ -10,22 +15,36 @@ import InputIcon from "./InputIcon";
 import { Modal, ModalProps } from "./Modal";
 
 const userLoginSchema = userSchema.omit(["name"]);
-type LoginInPutType = yup.InferType<typeof userLoginSchema>;
+export type LoginInPutType = yup.InferType<typeof userLoginSchema>;
 
 const ModalSignIn: FC<ModalProps> = (props) => {
+  const { mutate, isLoading } = useMutation({
+    mutationFn: authService.login,
+    onSuccess: (response) => {
+      message.success(response.data.message);
+      props.onCancel?.();
+      setGlobalState("LOGIN_MODAL", false);
+      createStorage('isLogin').set(true)
+    },
+    onError: (error: string) => {
+      message.error(error);
+    },
+  });
   const {
     register,
     handleSubmit,
-
+    reset,
     formState: { errors },
   } = useForm<LoginInPutType>({
     mode: "onChange",
     resolver: yupResolver(userLoginSchema),
   });
   const onSubmit: SubmitHandler<LoginInPutType> = (data) => {
-    console.log(data, "data");
+    mutate(data);
   };
-
+  useEffect(() => {
+    reset();
+  }, [props.open, reset]);
   return (
     <Modal {...props}>
       <div onClick={(e) => e}></div>
@@ -57,7 +76,7 @@ const ModalSignIn: FC<ModalProps> = (props) => {
             Forgot password?
           </div>
         </div>
-        <Button type="primary" className="mt-4">
+        <Button disabled={isLoading} type="primary" className="mt-4">
           Login
         </Button>
       </form>

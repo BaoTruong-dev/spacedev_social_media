@@ -10,12 +10,14 @@ class Http {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true,
     });
     this.instance.interceptors.response.use(
       (response) => {
         return response;
       },
       (error: AxiosError<ResponseError>) => {
+        console.log(error, "2");
         return Promise.reject(error.response?.data.errors.message);
       }
     );

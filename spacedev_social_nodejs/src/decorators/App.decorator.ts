@@ -25,7 +25,12 @@ export function AppDecorator(options: AppDecoratorOptions) {
         this.app = express();
         this.app.use(express.json());
         this.app.use(helmet());
-        this.app.use(cors());
+        this.app.use(
+          cors({
+            origin: process.env.FE_URL,
+            credentials: true,
+          })
+        );
         this.app.use(cookieParser());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use("/upload", express.static(path.join(__dirname, "upload")));

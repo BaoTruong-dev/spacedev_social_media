@@ -53,7 +53,7 @@ export const Button: FC<ButtonProps> = ({
           }
         )}
       >
-        <Spin spinning={Boolean(props.disabled)} className="mr-2" />
+        {props.disabled && <Spin className="mr-2" />}
         {props.children}
       </button>
     </ConfigProvider>

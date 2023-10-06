@@ -7,21 +7,34 @@ import { Modal, ModalProps } from "./Modal";
 import * as yup from "yup";
 import { userSchema } from "../schema/user.schema";
 import { yupResolver } from "@hookform/resolvers/yup";
+import authService from "../services/auth.service";
+import { useMutation } from "react-query";
+import { message } from "antd";
 
 const userForgotPasswordSchema = userSchema.omit(["name", "password"]);
-type forgotPasswordType = yup.InferType<typeof userForgotPasswordSchema>;
+export type ForgotPasswordType = yup.InferType<typeof userForgotPasswordSchema>;
 export const ModalForgotPassword: FC<ModalProps> = (props) => {
+  const { mutate, isLoading } = useMutation({
+    mutationFn: authService.forgot,
+    onSuccess: (response) => {
+      message.success(response.data.message);
+      props.onCancel?.();
+    },
+    onError: (error: string) => {
+      message.error(error);
+    },
+  });
   const {
     register,
     handleSubmit,
 
     formState: { errors },
-  } = useForm<forgotPasswordType>({
+  } = useForm<ForgotPasswordType>({
     mode: "onChange",
     resolver: yupResolver(userForgotPasswordSchema),
   });
-  const onSubmit: SubmitHandler<forgotPasswordType> = (data) => {
-    console.log(data, "data");
+  const onSubmit: SubmitHandler<ForgotPasswordType> = (data) => {
+    mutate(data);
   };
 
   return (
@@ -36,7 +49,7 @@ export const ModalForgotPassword: FC<ModalProps> = (props) => {
           placeHolder="Your email"
           error={errors.email?.message}
         />
-        <Button type="primary" className="mt-4">
+        <Button disabled={isLoading} type="primary" className="mt-4">
           Submit
         </Button>
       </form>

@@ -29,7 +29,6 @@ const ModalSignUp: FC<ModalProps> = (props) => {
     onSuccess: (response) => {
       message.success(response.data.message);
       props.onCancel?.();
-      setGlobalState("LOGIN_MODAL", false);
     },
     onError: (error: string) => {
       message.error(error);

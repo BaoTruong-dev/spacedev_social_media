@@ -106,7 +106,7 @@ export default class AuthController {
   }
   @Get("/verify-email")
   async verifyEmail(
-    req: RequestCustom<any,authVerifyEmailType>,
+    req: RequestCustom<any, authVerifyEmailType>,
     res: Response
   ) {
     await this.authService.verifyEmail(req.query);

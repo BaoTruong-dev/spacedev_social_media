@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import { PATH } from "../constants/path";
+import userService from "../services/user.service";
 import { setGlobalState, useGlobalState } from "../store/queryClient";
+import { createStorage } from "../utils/createStorage";
 import { useAuth } from "./AuthProvider";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
@@ -21,10 +23,16 @@ import { ModalLogin } from "./ModalLogin";
 import { Switch } from "./Switch";
 
 export const Header = () => {
+  const isLogin = createStorage("isLogin").get();
   const { mode, toggleMode } = useMode();
   const openLogin = useGlobalState("LOGIN_MODAL");
+  const { data: user } = useQuery(["MY_INFO"], {
+    queryFn: userService.getInfo,
+    enabled: !!isLogin,
+    staleTime: Infinity,
+  });
 
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   return (
     <>
       <ModalLogin

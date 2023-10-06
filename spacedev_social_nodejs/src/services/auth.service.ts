@@ -13,7 +13,7 @@ import { conditionError } from "../utils/checkedError";
 export interface authRegisterType {
   email: string;
   password: string;
-  name: string
+  name: string;
 }
 
 export interface authLoginType extends authRegisterType {}
@@ -41,7 +41,7 @@ export interface authLogoutType {
 export interface authResetPasswordType {
   email: string;
   password_code: string;
-  newPassword: string;
+  password: string;
 }
 @Injectable
 export default class AuthService {
@@ -104,7 +104,7 @@ export default class AuthService {
       httpStatus.toManyRequests
     );
     const code = generateRandomSalt();
-    const link = `${process.env.FE_URL}/auth/reset-password?password_code=${code}&&email=${email}`;
+    const link = `${process.env.FE_URL}?isReset&&password_code=${code}&&email=${email}`;
     client.setEx(email, 60, code);
     return await resetPasswordMail({ email, link });
   }
@@ -180,11 +180,14 @@ export default class AuthService {
   async resetPassword({
     password_code,
     email,
-    newPassword,
+    password,
   }: authResetPasswordType) {
     let codeInCatch = await client.get(email);
-    conditionError(!(codeInCatch === password_code), "Code or email is wrong!");
-    const hashNewPassword = hashPassword(newPassword);
+    conditionError(
+      !(codeInCatch === password_code),
+      "Code is expired or wrong!"
+    );
+    const hashNewPassword = hashPassword(password);
     await client.del(email);
     return await UserModel.findOneAndUpdate(
       { email },

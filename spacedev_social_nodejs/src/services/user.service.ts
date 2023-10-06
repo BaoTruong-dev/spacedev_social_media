@@ -22,11 +22,12 @@ export default class UserService {
         ...rest,
       }
     );
-        conditionError(
-          !result,
-         "User is not found!"
-        );
+    conditionError(!result, "User is not found!");
 
+    return result;
+  }
+  async getInfo(_id: string) {
+    const result = await UserModel.findOne({ _id }).select('name cover avatar date_of_birth');
     return result;
   }
 }

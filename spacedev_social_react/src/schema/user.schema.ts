@@ -20,7 +20,12 @@ export const userSchema = yup.object({
 });
 
 export const userResetPasswordSchema = yup.object({
-  password: userSchema.fields.password,
+  password: userSchema.fields.password as yup.StringSchema<
+    string,
+    yup.AnyObject,
+    undefined,
+    ""
+  >,
   confirmPassword: yup
     .string()
     .required("This field is required")

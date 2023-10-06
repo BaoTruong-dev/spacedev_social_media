@@ -5,7 +5,8 @@ export const Avatar: FC<{
   size?: number;
   border?: boolean;
   online?: boolean;
-  showStatus?: boolean
+  showStatus?: boolean;
+  url?: string;
 }> = ({ size = 32, ...props }) => {
   const id = useId();
   return (
@@ -17,8 +18,13 @@ export const Avatar: FC<{
     >
       <div className={cn("rounded-full overflow-hidden")}>
         <img
+          alt=""
           className="w-full h-full"
-          src={`https://unsplash.it/${size}/${size}?t=${id}`}
+          src={
+            props.url
+              ? props.url
+              : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png"
+          }
         />
       </div>
       {props.showStatus && (
